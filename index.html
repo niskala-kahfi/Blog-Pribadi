@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Niskala by Kahfi</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Config for Brutalist Theme -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        paper: '#fbfbf9', /* Updated to off-white (#fbfbf9) */
+                        ink: '#111111',
+                        accent: '#b91c1c'
+                    },
+                    fontFamily: {
+                        serif: ['Playfair Display', 'serif'],
+                        mono: ['Space Mono', 'monospace'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Brutalist Details */
+        ::selection {
+            background-color: #111111;
+            color: #fbfbf9;
+        }
+        body {
+            background-color: #fbfbf9;
+            color: #111111;
+            -webkit-tap-highlight-color: transparent; /* Fix mobile tap highlight */
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #fbfbf9;
+            border-left: 1px solid #111111;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #111111;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Signature Touches */
+        .noise-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.25;
+            mix-blend-mode: multiply;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+        #progress-bar {
+            position: fixed;
+            top: 0; left: 0;
+            height: 5px;
+            background-color: #111111;
+            width: 0%;
+            z-index: 100;
+            transition: width 0.1s ease-out;
+        }
+    </style>
+</head>
+<body class="font-sans min-h-screen flex flex-col selection:bg-ink selection:text-paper">
+
+    <!-- Signature: Noise Overlay -->
+    <div class="noise-overlay"></div>
+    
+    <!-- Signature: Progress Bar -->
+    <div id="progress-bar"></div>
+
+    <!-- Custom Toast Alert -->
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-ink text-paper font-mono text-xs px-4 py-2 border-2 border-ink hidden items-center justify-center transition-opacity duration-300">
+        <span id="toast-msg">Notification</span>
+    </div>
+
+    <!-- SECRET ADMIN LOGIN (Fixed Bottom Left) -->
+    <button onclick="promptAdmin()" class="fixed bottom-4 left-4 z-50 text-ink opacity-25 hover:opacity-100 transition-opacity cursor-pointer p-2" title="Ruang Redaksi">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4"/>
+            <path d="m21 2-9.6 9.6"/>
+            <circle cx="7.5" cy="15.5" r="5.5"/>
+        </svg>
+    </button>
+
+    <!-- MAIN HEADER -->
+    <header class="border-b-2 border-ink pt-16 pb-6 px-4 md:px-8 text-center bg-paper relative z-10">
+        <h1 class="text-5xl md:text-7xl lg:text-8xl font-serif font-bold tracking-tighter uppercase leading-none mb-4 break-words hyphens-auto">
+            Niskala
+        </h1>
+        <p class="font-serif italic text-base md:text-2xl max-w-2xl mx-auto text-ink/80 mb-6">
+            "Yang tak berwujud, tertangkap aksara. Menuliskan yang fana agar abadi."
+        </p>
+        <div class="font-mono text-xs uppercase tracking-widest border-t border-ink pt-4 mt-4 max-w-sm mx-auto">
+            By Kahfi
+        </div>
+    </header>
+
+    <!-- CATEGORY NAVIGATION -->
+    <nav id="nav-categories" class="border-b-2 border-ink font-mono text-xs md:text-sm uppercase tracking-wider bg-paper sticky top-0 z-20 flex overflow-x-auto">
+        <!-- Injected via JS -->
+    </nav>
+
+    <!-- CONTENT AREA -->
+    <main id="app-container" class="flex-1 flex flex-col w-full relative pb-32 transition-opacity duration-300 ease-in-out">
+        <!-- Content will be injected here: List View, Reader View, or Admin View -->
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t-2 border-ink py-6 px-4 md:px-8 flex justify-center items-center font-mono text-xs uppercase bg-paper mt-auto relative z-10">
+        <div class="opacity-70">&copy; 2026 NISKALA BY KAHFI.</div>
+    </footer>
+
+    <!-- Signature: Fixed Editorial Mark -->
+    <div class="fixed bottom-0 right-0 z-40 bg-paper border-t-2 border-l-2 border-ink px-2 py-2 md:px-4 md:py-3 text-[8px] md:text-xs font-mono uppercase tracking-widest text-ink pointer-events-none">
+        A space imagined by Dandi Kahfi.
+    </div>
+
+    <!-- PIN MODAL -->
+    <div id="pin-modal" class="fixed inset-0 bg-paper/90 backdrop-blur-sm z-50 hidden flex-col items-center justify-center p-4">
+        <div class="border-2 border-ink bg-paper p-8 w-full max-w-md shadow-[8px_8px_0_0_#111111]">
+            <h3 class="font-serif text-3xl mb-2">Akses Editorial</h3>
+            <p class="font-mono text-xs mb-6 text-ink/70">Masukkan PIN pengelola untuk masuk ke ruang redaksi.</p>
+            
+            <form onsubmit="handleLogin(event)" class="flex flex-col gap-4">
+                <input type="password" id="pin-input" placeholder="PIN..." maxlength="10" required 
+                    class="w-full text-center tracking-widest text-xl font-mono py-2 bg-transparent border-b-2 border-ink focus:outline-none focus:border-accent">
+                
+                <div class="flex gap-4 font-mono text-xs mt-4">
+                    <button type="button" onclick="closePinModal()" class="flex-1 py-3 border border-ink hover:bg-ink hover:text-paper uppercase transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-1 py-3 bg-ink text-paper border border-ink hover:bg-accent hover:border-accent uppercase transition-colors">
+                        Masuk
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- ================= JAVASCRIPT ================= -->
+    <script>
+        const CATEGORIES = ["Semua", "Pemikiran", "Pena Kandang", "Catatan"];
+        
+        const DEFAULT_ARTICLES = [
+            {
+                id: 'art-1',
+                title: 'Mendefinisikan Ulang Makna Kekosongan',
+                category: 'Pemikiran',
+                date: '2026-10-25',
+                content: 'Kekosongan seringkali disalahartikan sebagai ketiadaan. Dalam desain dan kehidupan, ruang kosong (negative space) adalah elemen aktif yang memberi napas pada objek utama.\n\nBrutalisme mengajarkan kita untuk jujur pada material. Tidak ada yang disembunyikan di balik ornamen. Demikian pula dalam pikiran, terkadang kita perlu mengosongkan ruang agar gagasan murni bisa terbentuk tanpa intervensi.'
+            },
+            {
+                id: 'art-2',
+                title: 'Sketsa dari Balik Meja Kayu',
+                category: 'Pena Kandang',
+                date: '2026-10-28',
+                content: 'Hari ini saya menyelesaikan sebuah proyek identitas visual. Rasanya seperti menyusun ulang tulang-belulang sebuah gagasan agar bisa berdiri tegak.\n\nSaya menyadari bahwa tipografi bukan sekadar memilih font, melainkan menentukan suara dan intonasi dari sebuah pesan. Serif memberikan wibawa, Sans-serif memberikan kejelasan, dan Monospace memberikan ketegasan mekanis.'
+            },
+            {
+                id: 'art-3',
+                title: 'Jurnal Harian: Oktober yang Singkat',
+                category: 'Catatan',
+                date: '2026-10-31',
+                content: 'Waktu berlalu tanpa menyisakan jejak fisik, kecuali apa yang kita catat. Niskala lahir dari kegelisahan tentang sesuatu yang abstrak namun terasa nyata.\n\nMelalui blog ini, saya ingin mendokumentasikan serpihan-serpihan pikiran yang sering lewat begitu saja saat sedang menyeduh kopi atau menatap layar kosong.'
+            }
+        ];
+
+        let state = {
+            articles: [],
+            currentView: 'home', // 'home', 'reader', 'admin'
+            activeCategory: 'Semua',
+            activeArticleId: null,
+            isAdminAuth: false,
+            pin: '2026'
+        };
+
+        /* INITIALIZATION */
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            renderCategories();
+            renderApp();
+        });
+
+        function loadData() {
+            const stored = localStorage.getItem('niskala_articles');
+            if (stored) {
+                try { state.articles = JSON.parse(stored); } 
+                catch(e) { state.articles = DEFAULT_ARTICLES; }
+            } else {
+                state.articles = DEFAULT_ARTICLES;
+                saveData();
+            }
+
+            if (sessionStorage.getItem('niskala_admin') === 'true') {
+                state.isAdminAuth = true;
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('niskala_articles', JSON.stringify(state.articles));
+        }
+
+        /* RENDERING CONTROLLER */
+        function renderApp() {
+            const container = document.getElementById('app-container');
+            container.innerHTML = '';
+            
+            // Reset Progress Bar
+            document.getElementById('progress-bar').style.width = '0%';
+            
+            const nav = document.getElementById('nav-categories');
+            if(state.currentView === 'home') {
+                nav.style.display = 'flex';
+                renderHome(container);
+            } else if(state.currentView === 'reader') {
+                nav.style.display = 'none';
+                renderReader(container);
+            } else if(state.currentView === 'admin') {
+                nav.style.display = 'none';
+                renderAdmin(container);
+            }
+        }
+
+        function renderCategories() {
+            const nav = document.getElementById('nav-categories');
+            nav.innerHTML = CATEGORIES.map(cat => `
+                <button onclick="setCategory('${cat}')" 
+                    class="flex-1 py-3 px-6 text-center border-r border-ink last:border-r-0 transition-colors whitespace-nowrap
+                    ${state.activeCategory === cat ? 'bg-ink text-paper' : 'hover:bg-ink/10'}">
+                    ${cat}
+                </button>
+            `).join('');
+        }
+
+        function setCategory(cat) {
+            const container = document.getElementById('app-container');
+            container.classList.add('opacity-0');
+            setTimeout(() => {
+                state.activeCategory = cat;
+                renderCategories();
+                renderApp();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                container.classList.remove('opacity-0');
+            }, 300);
+        }
+
+        /* PARSER UNTUK MARKDOWN / HTML DI MODE BACA */
+        function parseContent(text) {
+            if (!text) return '';
+            let html = text
+                .replace(/^### (.*$)/gim, '<h3 class="text-2xl md:text-3xl font-bold mt-6 mb-2">$1</h3>')
+                .replace(/^## (.*$)/gim, '<h2 class="text-3xl md:text-4xl font-bold mt-8 mb-3">$1</h2>')
+                .replace(/^# (.*$)/gim, '<h1 class="text-4xl md:text-5xl font-bold mt-10 mb-4">$1</h1>')
+                .replace(/\*\*(.*)\*\*/gim, '<b>$1</b>')
+                .replace(/\*(.*)\*/gim, '<i>$1</i>')
+                .replace(/\n\n/gim, '</p><p class="mt-4">')
+                .replace(/\n/gim, '<br>');
+            return `<p>${html}</p>`;
+        }
+
+        /* VIEWS */
+        function renderHome(container) {
+            const filtered = state.activeCategory === 'Semua' 
+                ? state.articles 
+                : state.articles.filter(a => a.category === state.activeCategory);
+
+            // Sort newest first
+            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            let html = `<div class="flex flex-col w-full">`;
+            
+            if(filtered.length === 0) {
+                html += `<div class="p-12 text-center font-mono text-sm opacity-50 italic w-full border-b-2 border-ink">Belum ada catatan di ruang ini.</div>`;
+            } else {
+                filtered.forEach(art => {
+                    // Menggunakan color inheritance yang bersih untuk hover/active
+                    html += `
+                        <article class="group cursor-pointer flex flex-col border-b-2 border-ink bg-paper hover:bg-ink hover:text-paper active:bg-ink active:text-paper transition-colors duration-300 p-6 md:p-12 lg:p-16" 
+                                 onclick="openArticle('${art.id}')">
+                            <div class="flex justify-between items-start mb-4 font-mono text-[10px] md:text-xs uppercase tracking-widest border-b border-current pb-2 opacity-70">
+                                <span>${art.category}</span>
+                                <span>${art.date}</span>
+                            </div>
+                            <h2 class="font-serif text-2xl md:text-3xl lg:text-4xl leading-[1.2] break-words hyphens-auto mt-2">
+                                ${art.title}
+                            </h2>
+                        </article>
+                    `;
+                });
+            }
+            
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        function renderReader(container) {
+            const art = state.articles.find(a => a.id === state.activeArticleId);
+            if(!art) {
+                goHome();
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="w-full max-w-4xl mx-auto p-6 md:p-12 lg:p-16 pb-32 fade-in">
+                    <button onclick="goHome()" class="font-mono text-xs md:text-sm uppercase tracking-widest border border-ink px-4 py-2 hover:bg-ink hover:text-paper active:bg-ink active:text-paper transition-colors mb-12">
+                        &larr; Kembali
+                    </button>
+                    
+                    <header class="mb-10 border-b-2 border-ink pb-8 md:pb-12">
+                        <div class="flex gap-4 font-mono text-[10px] md:text-xs uppercase tracking-widest mb-6 opacity-70">
+                            <span class="border border-current px-2 py-1">${art.category}</span>
+                            <span class="py-1">${art.date}</span>
+                        </div>
+                        <h1 class="font-serif text-3xl md:text-5xl lg:text-6xl leading-[1.1] mb-6 break-words hyphens-auto">${art.title}</h1>
+                    </header>
+                    
+                    <article class="font-serif text-lg md:text-xl lg:text-2xl leading-relaxed break-words hyphens-auto opacity-90">
+                        ${parseContent(art.content)}
+                        <span class="inline-block ml-2 text-current text-sm align-middle">■</span>
+                    </article>
+                </div>
+            `;
+        }
+
+        function renderAdmin(container) {
+            container.innerHTML = `
+                <div class="w-full border-b border-ink flex bg-ink text-paper font-mono text-xs uppercase p-2 items-center justify-between z-10">
+                    <span>Admin Dashboard // Editor Mode</span>
+                    <div class="flex gap-4">
+                        <button onclick="goHome()" class="hover:text-accent">&larr; Beranda</button>
+                        <button onclick="logoutAdmin()" class="hover:text-accent">Logout [X]</button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col lg:flex-row flex-1 fade-in h-full">
+                    <!-- Form Editor -->
+                    <div class="w-full lg:w-1/2 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-ink flex flex-col lg:min-h-[80vh]">
+                        <h2 class="font-serif text-3xl mb-2" id="form-title">Tulis Jurnal Baru</h2>
+                        <p class="font-mono text-[10px] uppercase opacity-50 mb-8">Mendukung format Markdown (*miring*, **tebal**, # Judul) & Tag HTML</p>
+                        <form id="editor-form" onsubmit="saveArticle(event)" class="space-y-6 flex-1 flex flex-col">
+                            <input type="hidden" id="edit-id">
+                            
+                            <div class="flex flex-col">
+                                <label class="font-mono text-xs uppercase mb-2">Judul Tulisan</label>
+                                <input type="text" id="edit-title" required 
+                                    class="border-b-2 border-ink bg-transparent py-2 font-serif text-2xl focus:outline-none focus:border-accent">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-6">
+                                <div class="flex flex-col">
+                                    <label class="font-mono text-xs uppercase mb-2">Kategori</label>
+                                    <select id="edit-category" class="border-2 border-ink bg-transparent p-2 font-mono text-sm focus:outline-none focus:border-accent uppercase">
+                                        <option value="Pemikiran">Pemikiran</option>
+                                        <option value="Pena Kandang">Pena Kandang</option>
+                                        <option value="Catatan">Catatan</option>
+                                    </select>
+                                </div>
+                                <div class="flex flex-col">
+                                    <label class="font-mono text-xs uppercase mb-2">Tanggal</label>
+                                    <input type="date" id="edit-date" required 
+                                        class="border-2 border-ink bg-transparent p-2 font-mono text-sm focus:outline-none focus:border-accent">
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col flex-1">
+                                <label class="font-mono text-xs uppercase mb-2">Isi Tulisan</label>
+                                <textarea id="edit-content" required 
+                                    class="flex-1 min-h-[300px] border-2 border-ink bg-transparent p-4 font-serif text-base focus:outline-none focus:border-accent resize-y"></textarea>
+                            </div>
+
+                            <div class="flex gap-4 pt-4 border-t border-ink">
+                                <button type="submit" class="flex-1 py-3 bg-ink text-paper font-mono uppercase text-sm hover:bg-accent transition-colors">
+                                    Simpan Tulisan
+                                </button>
+                                <button type="button" onclick="resetForm()" class="flex-1 py-3 border-2 border-ink font-mono uppercase text-sm hover:bg-ink hover:text-paper transition-colors">
+                                    Bersihkan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- List Articles in Admin -->
+                    <div class="w-full lg:w-1/2 p-6 md:p-8 bg-paper/50 flex flex-col lg:min-h-[80vh]">
+                        <h2 class="font-mono text-xs uppercase tracking-widest border-b-2 border-ink pb-2 mb-4">Pengaturan Data</h2>
+                        
+                        <!-- JSON Backup Feature -->
+                        <div class="flex gap-2 mb-8">
+                            <button onclick="exportJSON()" class="flex-1 border border-ink py-2 font-mono text-xs uppercase bg-ink text-paper hover:bg-accent hover:border-accent transition-colors">
+                                Export .JSON
+                            </button>
+                            <label class="flex-1 border border-ink py-2 font-mono text-xs uppercase hover:bg-ink hover:text-paper transition-colors text-center cursor-pointer">
+                                Import .JSON
+                                <input type="file" accept=".json" onchange="importJSON(event)" class="hidden">
+                            </label>
+                        </div>
+
+                        <h2 class="font-mono text-xs uppercase tracking-widest border-b-2 border-ink pb-2 mb-4">Arsip Tulisan</h2>
+                        <div class="flex flex-col gap-4 overflow-y-auto pr-2" style="max-height: 50vh;">
+                            ${state.articles.map(art => `
+                                <div class="border border-ink bg-paper p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-accent transition-colors">
+                                    <div class="flex-1">
+                                        <div class="font-mono text-[10px] uppercase mb-1 opacity-70">${art.category} • ${art.date}</div>
+                                        <div class="font-serif text-lg leading-tight truncate max-w-[250px] md:max-w-md">${art.title}</div>
+                                    </div>
+                                    <div class="flex gap-2 font-mono text-xs shrink-0">
+                                        <button onclick="editArticle('${art.id}')" class="border border-ink px-3 py-1 hover:bg-ink hover:text-paper transition-colors">Edit</button>
+                                        <button onclick="deleteArticle('${art.id}')" class="border border-accent text-accent px-3 py-1 hover:bg-accent hover:text-paper transition-colors">Hapus</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Set default date to today
+            if(!document.getElementById('edit-id').value) {
+                document.getElementById('edit-date').value = new Date().toISOString().split('T')[0];
+            }
+        }
+
+        /* ACTIONS */
+        function goHome() {
+            const container = document.getElementById('app-container');
+            container.classList.add('opacity-0');
+            
+            setTimeout(() => {
+                state.currentView = 'home';
+                renderApp();
+                window.scrollTo(0,0);
+                container.classList.remove('opacity-0');
+            }, 300);
+        }
+
+        function openArticle(id) {
+            const container = document.getElementById('app-container');
+            container.classList.add('opacity-0');
+            
+            setTimeout(() => {
+                state.activeArticleId = id;
+                state.currentView = 'reader';
+                renderApp();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                container.classList.remove('opacity-0');
+            }, 300);
+        }
+
+        /* JSON BACKUP / RESTORE */
+        function exportJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.articles));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "niskala_backup_" + new Date().getTime() + ".json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+            showToast("Backup JSON berhasil diunduh.");
+        }
+
+        function importJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if(Array.isArray(imported)) {
+                        state.articles = imported;
+                        saveData();
+                        renderApp();
+                        showToast("Data berhasil dipulihkan dari JSON.");
+                    } else {
+                        showToast("Format file JSON tidak sesuai.");
+                    }
+                } catch (err) {
+                    showToast("Error saat membaca file JSON.");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; // reset input file
+        }
+
+        /* ADMIN & AUTH LOGIC */
+        function promptAdmin() {
+            if (state.isAdminAuth) {
+                const container = document.getElementById('app-container');
+                container.classList.add('opacity-0');
+                
+                setTimeout(() => {
+                    state.currentView = 'admin';
+                    renderApp();
+                    container.classList.remove('opacity-0');
+                }, 300);
+            } else {
+                document.getElementById('pin-modal').classList.remove('hidden');
+                document.getElementById('pin-modal').classList.add('flex');
+                document.getElementById('pin-input').value = '';
+                document.getElementById('pin-input').focus();
+            }
+        }
+
+        function closePinModal() {
+            document.getElementById('pin-modal').classList.add('hidden');
+            document.getElementById('pin-modal').classList.remove('flex');
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const pin = document.getElementById('pin-input').value;
+            if (pin === state.pin) {
+                state.isAdminAuth = true;
+                sessionStorage.setItem('niskala_admin', 'true');
+                closePinModal();
+                showToast("Akses Diterima.");
+                
+                const container = document.getElementById('app-container');
+                container.classList.add('opacity-0');
+                setTimeout(() => {
+                    state.currentView = 'admin';
+                    renderApp();
+                    container.classList.remove('opacity-0');
+                }, 300);
+            } else {
+                showToast("PIN Salah!");
+            }
+        }
+
+        function logoutAdmin() {
+            state.isAdminAuth = false;
+            sessionStorage.removeItem('niskala_admin');
+            showToast("Logout Berhasil.");
+            goHome();
+        }
+
+        /* CMS LOGIC */
+        function saveArticle(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('edit-id').value;
+            const newArt = {
+                id: id || 'art-' + Date.now(),
+                title: document.getElementById('edit-title').value,
+                category: document.getElementById('edit-category').value,
+                date: document.getElementById('edit-date').value,
+                content: document.getElementById('edit-content').value
+            };
+
+            if (id) {
+                const index = state.articles.findIndex(a => a.id === id);
+                state.articles[index] = newArt;
+                showToast("Tulisan diperbarui.");
+            } else {
+                state.articles.unshift(newArt);
+                showToast("Tulisan diterbitkan.");
+            }
+
+            saveData();
+            renderApp();
+        }
+
+        function editArticle(id) {
+            const art = state.articles.find(a => a.id === id);
+            if (!art) return;
+            
+            document.getElementById('form-title').innerText = "Edit Tulisan";
+            document.getElementById('edit-id').value = art.id;
+            document.getElementById('edit-title').value = art.title;
+            document.getElementById('edit-category').value = art.category;
+            document.getElementById('edit-date').value = art.date;
+            document.getElementById('edit-content').value = art.content;
+            
+            // Scroll back up to the form
+            document.getElementById('editor-form').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function deleteArticle(id) {
+            state.articles = state.articles.filter(a => a.id !== id);
+            saveData();
+            showToast("Tulisan dihapus permanen.");
+            renderApp();
+        }
+
+        function resetForm() {
+            document.getElementById('editor-form').reset();
+            document.getElementById('edit-id').value = '';
+            document.getElementById('form-title').innerText = "Tulis Jurnal Baru";
+            document.getElementById('edit-date').value = new Date().toISOString().split('T')[0];
+        }
+
+        /* CUSTOM UI UTILS */
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = message;
+            
+            toast.classList.remove('hidden');
+            toast.classList.add('flex');
+            
+            if(window.toastTimer) clearTimeout(window.toastTimer);
+            
+            window.toastTimer = setTimeout(() => {
+                toast.classList.add('hidden');
+                toast.classList.remove('flex');
+            }, 3000);
+        }
+        
+        /* SCROLL PROGRESS LISTENER */
+        window.addEventListener('scroll', () => {
+            // Berlaku baik di menu utama maupun di mode baca
+            if (state.currentView === 'home' || state.currentView === 'reader') {
+                const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+                const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                if (height > 0) {
+                    const scrolled = (winScroll / height) * 100;
+                    document.getElementById('progress-bar').style.width = scrolled + "%";
+                }
+            }
+        });
+    </script>
+</body>
+</html>

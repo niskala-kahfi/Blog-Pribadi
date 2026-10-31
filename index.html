@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Niskala by Kahfi</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Config for Brutalist Theme -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        paper: '#fbfbf9',
+                        ink: '#000000',
+                    },
+                    fontFamily: {
+                        serif: ['Playfair Display', 'serif'],
+                        mono: ['Space Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        ::selection { background-color: #000000; color: #fbfbf9; }
+        body {
+            background-color: #fbfbf9;
+            color: #000000;
+            -webkit-tap-highlight-color: transparent;
+            padding-bottom: 3rem; /* Space for fixed footer */
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #fbfbf9; border-left: 2px solid #000000; }
+        ::-webkit-scrollbar-thumb { background: #000000; }
+        
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Signature Touches */
+        .noise-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: 9999; opacity: 0.25; mix-blend-mode: multiply;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+        #progress-bar {
+            position: fixed; top: 0; left: 0; height: 5px; background-color: #000000;
+            width: 0%; z-index: 100; transition: width 0.1s ease-out;
+        }
+    </style>
+</head>
+<body class="font-serif min-h-screen flex flex-col selection:bg-ink selection:text-paper">
+
+    <!-- Signature: Noise Overlay & Progress Bar -->
+    <div class="noise-overlay"></div>
+    <div id="progress-bar"></div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-ink text-paper font-mono text-xs px-4 py-2 border-2 border-ink hidden items-center justify-center transition-opacity duration-300">
+        <span id="toast-msg">Notification</span>
+    </div>
+
+    <!-- SECRET ADMIN LOGIN -->
+    <button onclick="promptAdmin()" class="fixed top-6 right-6 z-50 text-ink opacity-25 hover:opacity-100 transition-opacity cursor-pointer p-2" title="Ruang Redaksi">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4"/>
+            <path d="m21 2-9.6 9.6"/>
+            <circle cx="7.5" cy="15.5" r="5.5"/>
+        </svg>
+    </button>
+
+    <!-- MAIN HEADER (Always visible) -->
+    <header class="pt-16 pb-8 px-4 md:px-8 text-center bg-paper relative z-10 w-full">
+        <h1 class="text-6xl md:text-7xl lg:text-[7rem] font-bold tracking-tighter uppercase leading-none mb-4 break-words">
+            Niskala
+        </h1>
+        <p class="italic text-sm md:text-lg lg:text-xl max-w-xl mx-auto text-ink/80 mb-6">
+            "Yang tak berwujud, tertangkap aksara. Menuliskan yang fana agar abadi."
+        </p>
+        <div class="flex items-center justify-center font-mono text-[10px] md:text-xs uppercase tracking-widest mt-6 max-w-sm mx-auto w-full">
+            <div class="flex-1 border-t border-ink"></div>
+            <span class="px-4">By Kahfi</span>
+            <div class="flex-1 border-t border-ink"></div>
+        </div>
+    </header>
+
+    <!-- CATEGORY NAVIGATION (Only on Home) -->
+    <nav id="nav-categories" class="grid grid-cols-4 border-y-2 border-ink divide-x-2 divide-ink font-mono text-[9px] md:text-xs uppercase tracking-wider bg-paper sticky top-0 z-20">
+        <!-- Injected via JS -->
+    </nav>
+
+    <!-- CONTENT AREA -->
+    <main id="app-container" class="flex-1 flex flex-col w-full relative transition-opacity duration-300 ease-in-out bg-paper">
+        <!-- Content will be injected here: List View, Reader View, or Admin View -->
+    </main>
+
+    <!-- FIXED FOOTER -->
+    <footer class="fixed bottom-0 left-0 w-full border-t-2 border-ink py-2 md:py-3 px-4 md:px-8 flex justify-between items-center font-mono text-[9px] md:text-xs uppercase bg-paper z-40">
+        <div>&copy; 2026 NISKALA BY KAHFI.</div>
+        <div>A space imagined by Dandi Kahfi.</div>
+    </footer>
+
+    <!-- PIN MODAL -->
+    <div id="pin-modal" class="fixed inset-0 bg-paper/90 backdrop-blur-sm z-50 hidden flex-col items-center justify-center p-4">
+        <div class="border-2 border-ink bg-paper p-8 w-full max-w-md shadow-[8px_8px_0_0_#000000]">
+            <h3 class="text-3xl mb-2 font-bold">Akses Editorial</h3>
+            <p class="font-mono text-xs mb-6 text-ink/70">Masukkan PIN pengelola (2026).</p>
+            
+            <form onsubmit="handleLogin(event)" class="flex flex-col gap-4">
+                <input type="password" id="pin-input" placeholder="PIN..." maxlength="10" required 
+                    class="w-full text-center tracking-widest text-xl font-mono py-2 bg-transparent border-b-2 border-ink focus:outline-none">
+                
+                <div class="flex gap-4 font-mono text-xs mt-4">
+                    <button type="button" onclick="closePinModal()" class="flex-1 py-3 border-2 border-ink hover:bg-ink hover:text-paper uppercase transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-1 py-3 bg-ink text-paper border-2 border-ink hover:bg-paper hover:text-ink uppercase transition-colors">
+                        Masuk
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- ================= JAVASCRIPT ================= -->
+    <script>
+        const CATEGORIES = ["Semua", "Pemikiran", "Pena Kandang", "Catatan"];
+        
+        const DEFAULT_ARTICLES = [
+            {
+                id: 'art-1',
+                title: 'Jurnal Harian: Oktober yang Singkat',
+                category: 'Catatan',
+                date: '2026-10-31',
+                image: 'https://placehold.co/400x300/e5e5e5/000000?text=Oktober',
+                content: 'Waktu berlalu tanpa menyisakan jejak fisik, kecuali apa yang kita catat. Niskala lahir dari kegelisahan tentang sesuatu yang abstrak namun terasa nyata.\n\nMelalui blog ini, saya ingin mendokumentasikan serpihan-serpihan pikiran yang sering lewat begitu saja saat sedang menyeduh kopi atau menatap layar kosong.'
+            },
+            {
+                id: 'art-2',
+                title: 'Sketsa dari Balik Meja Kayu',
+                category: 'Pena Kandang',
+                date: '2026-10-28',
+                image: 'https://placehold.co/400x300/e5e5e5/000000?text=Sketsa',
+                content: 'Hari ini saya menyelesaikan sebuah proyek identitas visual. Rasanya seperti menyusun ulang tulang-belulang sebuah gagasan agar bisa berdiri tegak.\n\nSaya menyadari bahwa tipografi bukan sekadar memilih font, melainkan menentukan suara dan intonasi dari sebuah pesan. Serif memberikan wibawa, Sans-serif memberikan kejelasan, dan Monospace memberikan ketegasan mekanis.'
+            },
+            {
+                id: 'art-3',
+                title: 'Jurnal Harian : November yang ditunggu',
+                category: 'Catatan',
+                date: '2026-11-01',
+                image: 'https://placehold.co/400x300/e5e5e5/000000?text=November',
+                content: 'Menyambut lembaran baru di bulan kesebelas. Dinginnya angin sore memberikan perspektif yang berbeda tentang bagaimana kita menghargai jeda.\n\nKekosongan seringkali disalahartikan sebagai ketiadaan. Dalam desain dan kehidupan, ruang kosong (negative space) adalah elemen aktif yang memberi napas pada objek utama.'
+            }
+        ];
+
+        let state = {
+            articles: [],
+            currentView: 'home', // 'home', 'reader', 'admin'
+            activeCategory: 'Semua',
+            activeArticleId: null,
+            isAdminAuth: false,
+            pin: '2026'
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            renderApp();
+        });
+
+        function loadData() {
+            const stored = localStorage.getItem('niskala_data');
+            if (stored) {
+                try { state.articles = JSON.parse(stored); } 
+                catch(e) { state.articles = DEFAULT_ARTICLES; }
+            } else {
+                state.articles = DEFAULT_ARTICLES;
+                saveData();
+            }
+            if (sessionStorage.getItem('niskala_admin') === 'true') {
+                state.isAdminAuth = true;
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('niskala_data', JSON.stringify(state.articles));
+        }
+
+        function renderApp() {
+            const container = document.getElementById('app-container');
+            container.innerHTML = '';
+            document.getElementById('progress-bar').style.width = '0%';
+            
+            const nav = document.getElementById('nav-categories');
+            
+            if(state.currentView === 'home') {
+                nav.style.display = 'grid';
+                renderCategories();
+                renderHome(container);
+            } else {
+                nav.style.display = 'none';
+                if(state.currentView === 'reader') renderReader(container);
+                if(state.currentView === 'admin') renderAdmin(container);
+            }
+        }
+
+        function renderCategories() {
+            const nav = document.getElementById('nav-categories');
+            nav.innerHTML = CATEGORIES.map(cat => `
+                <button onclick="setCategory('${cat}')" 
+                    class="py-3 text-center transition-colors w-full h-full
+                    ${state.activeCategory === cat ? 'bg-ink text-paper' : 'hover:bg-ink hover:text-paper'}">
+                    ${cat}
+                </button>
+            `).join('');
+        }
+
+        function setCategory(cat) {
+            const container = document.getElementById('app-container');
+            container.classList.add('opacity-0');
+            setTimeout(() => {
+                state.activeCategory = cat;
+                renderCategories();
+                renderApp();
+                container.classList.remove('opacity-0');
+            }, 300);
+        }
+
+        function parseContent(text) {
+            if (!text) return '';
+            let html = text
+                .replace(/^### (.*$)/gim, '<h3 class="text-2xl font-bold mt-6 mb-2">$1</h3>')
+                .replace(/^## (.*$)/gim, '<h2 class="text-3xl font-bold mt-8 mb-3">$1</h2>')
+                .replace(/^# (.*$)/gim, '<h1 class="text-4xl font-bold mt-10 mb-4">$1</h1>')
+                .replace(/\*\*(.*)\*\*/gim, '<b>$1</b>')
+                .replace(/\*(.*)\*/gim, '<i>$1</i>')
+                .replace(/\n\n/gim, '</p><p class="mt-4">')
+                .replace(/\n/gim, '<br>');
+            return `<p>${html}</p>`;
+        }
+
+        function renderHome(container) {
+            let filtered = state.activeCategory === 'Semua' ? state.articles : state.articles.filter(a => a.category === state.activeCategory);
+            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            let html = `<div class="flex flex-col w-full">`;
+            if(filtered.length === 0) {
+                html += `<div class="p-12 text-center font-mono text-sm opacity-50 border-b-2 border-ink">Tidak ada catatan.</div>`;
+            } else {
+                filtered.forEach(art => {
+                    const fallbackImg = "https://placehold.co/120x120/e5e5e5/000000?text=Cover";
+                    html += `
+                        <article class="group cursor-pointer flex flex-row border-b-2 border-ink bg-paper hover:bg-ink hover:text-paper active:bg-ink active:text-paper transition-colors duration-300" onclick="openArticle('${art.id}')">
+                            <div class="p-4 md:p-6 border-r-2 border-current shrink-0 flex items-center justify-center">
+                                <div class="border-2 border-ink bg-white p-1 shadow-[2px_2px_0_0_#000000] group-hover:border-paper group-hover:shadow-[2px_2px_0_0_#fbfbf9] transition-all">
+                                    <img src="${art.image || fallbackImg}" class="w-20 h-20 md:w-32 md:h-32 object-cover grayscale group-hover:grayscale-0 transition-all duration-500" alt="Cover">
+                                </div>
+                            </div>
+                            <div class="flex-1 p-4 md:p-8 flex flex-col justify-center">
+                                <div class="flex flex-col md:flex-row md:justify-between md:items-end font-mono text-[10px] md:text-xs uppercase tracking-widest border-b-2 border-current pb-2 mb-4">
+                                    <span>${art.category}</span>
+                                    <span>${art.date}</span>
+                                </div>
+                                <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight leading-[1.15]">
+                                    ${art.title}
+                                </h2>
+                            </div>
+                        </article>
+                    `;
+                });
+            }
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        function renderReader(container) {
+            const art = state.articles.find(a => a.id === state.activeArticleId);
+            if(!art) { goHome(); return; }
+            
+            const fallbackImg = "https://placehold.co/600x400/e5e5e5/000000?text=Cover";
+            const formattedDate = art.date.replace(/-/g, ' - '); // e.g. 2026 - 11 - 01
+
+            container.innerHTML = `
+                <div class="w-full max-w-5xl mx-auto px-6 py-10 md:py-12 pb-32 fade-in">
+                    <button onclick="goHome()" class="font-mono text-xs uppercase tracking-widest border-2 border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors mb-8">
+                        &larr; KEMBALI
+                    </button>
+                    
+                    <!-- Top section as per Sketch 2 -->
+                    <div class="flex flex-col md:flex-row gap-6 md:gap-12 items-center md:items-start mb-10">
+                        <div class="shrink-0 w-full md:w-1/2">
+                            <div class="border-2 border-ink p-3 md:p-4 bg-[#e5e5e5] inline-block shadow-[4px_4px_0_0_#000000]">
+                                <img src="${art.image || fallbackImg}" class="w-full max-w-md h-auto object-cover border-2 border-ink" alt="${art.title}">
+                            </div>
+                        </div>
+                        <div class="flex-1 flex flex-col justify-center w-full">
+                            <h1 class="text-4xl md:text-5xl lg:text-[4rem] font-bold tracking-tight leading-none mb-6">${art.title}</h1>
+                            <div class="flex items-center gap-4 font-mono text-[10px] md:text-xs uppercase tracking-widest">
+                                <span class="border border-ink px-4 py-1">${art.category}</span>
+                                <span>${formattedDate}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Middle Horizontal Line -->
+                    <hr class="border-t-2 border-ink mb-10">
+                    
+                    <!-- Article Content -->
+                    <article class="text-base md:text-lg lg:text-xl leading-[1.8] break-words hyphens-auto max-w-2xl">
+                        ${parseContent(art.content)}
+                        <span class="inline-block ml-2 text-ink text-sm align-middle">■</span>
+                    </article>
+                </div>
+            `;
+        }
+
+        function renderAdmin(container) {
+            container.innerHTML = `
+                <div class="w-full border-b-2 border-ink flex bg-ink text-paper font-mono text-xs uppercase p-3 items-center justify-between z-10">
+                    <span>Admin // Editor</span>
+                    <div class="flex gap-4">
+                        <button onclick="goHome()" class="hover:opacity-70">&larr; Beranda</button>
+                        <button onclick="logoutAdmin()" class="hover:opacity-70">Logout [X]</button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col lg:flex-row flex-1 fade-in pb-16">
+                    <div class="w-full lg:w-1/2 p-6 border-b-2 lg:border-b-0 lg:border-r-2 border-ink flex flex-col">
+                        <h2 class="text-3xl mb-6 border-b-2 border-ink pb-2">Tulis Jurnal</h2>
+                        <form id="editor-form" onsubmit="saveArticle(event)" class="space-y-4 flex flex-col">
+                            <input type="hidden" id="edit-id">
+                            
+                            <div class="flex flex-col">
+                                <label class="font-mono text-xs uppercase mb-1">Judul Tulisan</label>
+                                <input type="text" id="edit-title" required class="border-2 border-ink bg-transparent py-2 px-3 text-xl focus:outline-none focus:bg-ink focus:text-paper transition-colors">
+                            </div>
+
+                            <div class="flex flex-col md:flex-row gap-4">
+                                <div class="flex flex-col flex-1">
+                                    <label class="font-mono text-xs uppercase mb-1">Kategori</label>
+                                    <select id="edit-category" class="border-2 border-ink bg-transparent p-2 font-mono text-sm focus:outline-none uppercase">
+                                        <option value="Pemikiran">Pemikiran</option>
+                                        <option value="Pena Kandang">Pena Kandang</option>
+                                        <option value="Catatan">Catatan</option>
+                                    </select>
+                                </div>
+                                <div class="flex flex-col flex-1">
+                                    <label class="font-mono text-xs uppercase mb-1">Tanggal</label>
+                                    <input type="date" id="edit-date" required class="border-2 border-ink bg-transparent p-2 font-mono text-sm focus:outline-none">
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col">
+                                <label class="font-mono text-xs uppercase mb-1">Gambar (Square/Landscape direkomendasikan)</label>
+                                <input type="hidden" id="edit-image-data">
+                                <input type="file" id="edit-image-file" accept="image/*" onchange="handleImageUpload(event)" class="border-2 border-ink bg-transparent p-1 font-mono text-xs focus:outline-none">
+                                <img id="image-preview" src="" class="hidden mt-2 w-32 h-32 object-cover border-2 border-ink">
+                            </div>
+
+                            <div class="flex flex-col">
+                                <label class="font-mono text-xs uppercase mb-1">Isi (Markdown support)</label>
+                                <textarea id="edit-content" required class="min-h-[250px] border-2 border-ink bg-transparent p-3 text-lg focus:outline-none focus:bg-ink focus:text-paper transition-colors"></textarea>
+                            </div>
+
+                            <div class="flex gap-2 pt-2">
+                                <button type="submit" class="flex-1 py-3 bg-ink text-paper font-mono uppercase text-sm border-2 border-ink hover:bg-paper hover:text-ink transition-colors">Simpan</button>
+                                <button type="button" onclick="resetForm()" class="flex-1 py-3 border-2 border-ink font-mono uppercase text-sm hover:bg-ink hover:text-paper transition-colors">Batal</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="w-full lg:w-1/2 p-6 flex flex-col">
+                        <div class="flex justify-between items-center border-b-2 border-ink pb-2 mb-4">
+                            <h2 class="font-mono text-xs uppercase">Arsip Data</h2>
+                            <div class="flex gap-2">
+                                <button onclick="exportJSON()" class="border-2 border-ink px-2 py-1 font-mono text-[10px] bg-ink text-paper hover:bg-paper hover:text-ink">Export .JSON</button>
+                                <label class="border-2 border-ink px-2 py-1 font-mono text-[10px] hover:bg-ink hover:text-paper cursor-pointer">
+                                    Import .JSON <input type="file" accept=".json" onchange="importJSON(event)" class="hidden">
+                                </label>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-4 overflow-y-auto pr-2 max-h-[60vh]">
+                            ${state.articles.map(art => `
+                                <div class="border-2 border-ink p-3 flex justify-between items-center gap-4 bg-paper hover:bg-ink hover:text-paper transition-colors">
+                                    <div class="flex-1 truncate">
+                                        <div class="font-mono text-[10px] uppercase mb-1 opacity-70">${art.category} • ${art.date}</div>
+                                        <div class="text-lg truncate">${art.title}</div>
+                                    </div>
+                                    <div class="flex flex-col gap-1 font-mono text-[10px] shrink-0">
+                                        <button onclick="editArticle('${art.id}')" class="border border-current px-2 py-1 hover:opacity-70">Edit</button>
+                                        <button onclick="deleteArticle('${art.id}')" class="border border-current px-2 py-1 hover:opacity-70">Hapus</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            if(!document.getElementById('edit-id').value) document.getElementById('edit-date').value = new Date().toISOString().split('T')[0];
+        }
+
+        function goHome() {
+            const container = document.getElementById('app-container');
+            container.classList.add('opacity-0');
+            setTimeout(() => {
+                state.currentView = 'home';
+                renderApp();
+                window.scrollTo(0,0);
+                container.classList.remove('opacity-0');
+            }, 300);
+        }
+
+        function openArticle(id) {
+            const container = document.getElementById('app-container');
+            container.classList.add('opacity-0');
+            setTimeout(() => {
+                state.activeArticleId = id;
+                state.currentView = 'reader';
+                renderApp();
+                window.scrollTo(0,0);
+                container.classList.remove('opacity-0');
+            }, 300);
+        }
+
+        function promptAdmin() {
+            if (state.isAdminAuth) {
+                const container = document.getElementById('app-container');
+                container.classList.add('opacity-0');
+                setTimeout(() => {
+                    state.currentView = 'admin';
+                    renderApp();
+                    container.classList.remove('opacity-0');
+                }, 300);
+            } else {
+                document.getElementById('pin-modal').classList.remove('hidden');
+                document.getElementById('pin-modal').classList.add('flex');
+                document.getElementById('pin-input').value = '';
+                document.getElementById('pin-input').focus();
+            }
+        }
+
+        function closePinModal() {
+            document.getElementById('pin-modal').classList.add('hidden');
+            document.getElementById('pin-modal').classList.remove('flex');
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            if (document.getElementById('pin-input').value === state.pin) {
+                state.isAdminAuth = true;
+                sessionStorage.setItem('niskala_admin', 'true');
+                closePinModal();
+                showToast("Akses Diterima");
+                promptAdmin();
+            } else {
+                showToast("PIN Salah!");
+            }
+        }
+
+        function logoutAdmin() {
+            state.isAdminAuth = false;
+            sessionStorage.removeItem('niskala_admin');
+            showToast("Logout Berhasil");
+            goHome();
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 600;
+                    let scale = Math.min(MAX_WIDTH / img.width, 1);
+                    canvas.width = img.width * scale;
+                    canvas.height = img.height * scale;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    document.getElementById('edit-image-data').value = dataUrl;
+                    document.getElementById('image-preview').src = dataUrl;
+                    document.getElementById('image-preview').classList.remove('hidden');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function saveArticle(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-id').value;
+            const newArt = {
+                id: id || 'art-' + Date.now(),
+                title: document.getElementById('edit-title').value,
+                category: document.getElementById('edit-category').value,
+                date: document.getElementById('edit-date').value,
+                image: document.getElementById('edit-image-data').value,
+                content: document.getElementById('edit-content').value
+            };
+            if (id) {
+                const index = state.articles.findIndex(a => a.id === id);
+                state.articles[index] = newArt;
+                showToast("Tulisan diperbarui");
+            } else {
+                state.articles.unshift(newArt);
+                showToast("Tulisan diterbitkan");
+            }
+            saveData(); renderApp();
+        }
+
+        function editArticle(id) {
+            const art = state.articles.find(a => a.id === id);
+            if (!art) return;
+            document.getElementById('edit-id').value = art.id;
+            document.getElementById('edit-title').value = art.title;
+            document.getElementById('edit-category').value = art.category;
+            document.getElementById('edit-date').value = art.date;
+            document.getElementById('edit-content').value = art.content;
+            if (art.image) {
+                document.getElementById('edit-image-data').value = art.image;
+                document.getElementById('image-preview').src = art.image;
+                document.getElementById('image-preview').classList.remove('hidden');
+            } else {
+                document.getElementById('edit-image-data').value = '';
+                document.getElementById('image-preview').src = '';
+                document.getElementById('image-preview').classList.add('hidden');
+            }
+        }
+
+        function deleteArticle(id) {
+            state.articles = state.articles.filter(a => a.id !== id);
+            saveData(); showToast("Tulisan dihapus"); renderApp();
+        }
+
+        function resetForm() {
+            document.getElementById('editor-form').reset();
+            document.getElementById('edit-id').value = '';
+            document.getElementById('edit-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('edit-image-data').value = '';
+            document.getElementById('image-preview').classList.add('hidden');
+        }
+
+        function exportJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.articles));
+            const dl = document.createElement('a');
+            dl.setAttribute("href", dataStr);
+            dl.setAttribute("download", "niskala_backup.json");
+            document.body.appendChild(dl); dl.click(); dl.remove();
+            showToast("Backup diunduh");
+        }
+
+        function importJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if(Array.isArray(imported)) {
+                        state.articles = imported; saveData(); renderApp(); showToast("Data dipulihkan");
+                    }
+                } catch (err) { showToast("Format tidak valid"); }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = message;
+            toast.classList.remove('hidden'); toast.classList.add('flex');
+            if(window.toastTimer) clearTimeout(window.toastTimer);
+            window.toastTimer = setTimeout(() => { toast.classList.add('hidden'); toast.classList.remove('flex'); }, 2500);
+        }
+        
+        window.addEventListener('scroll', () => {
+            if (state.currentView === 'home' || state.currentView === 'reader') {
+                const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+                const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                if (height > 0) document.getElementById('progress-bar').style.width = (winScroll / height * 100) + "%";
+            }
+        });
+    </script>
+</body>
+</html>
